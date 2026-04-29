@@ -1,0 +1,72 @@
+name: Model Checks
+
+on:
+  workflow_call:
+    inputs:
+      model_paths:
+        required: false
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs:
+      model_paths:
+        description: 'Comma-separated .SemanticModel directories (blank = all)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  model-checks:
+    runs-on: windows-latest  # Tabular Editor 2 requires Windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r .cicd/requirements.txt
+
+      - name: Download Tabular Editor 2
+        shell: pwsh
+        run: |
+          $url = "https://github.com/TabularEditor/TabularEditor/releases/latest/download/TabularEditor.Portable.zip"
+          Invoke-WebRequest -Uri $url -OutFile TabularEditor.zip
+          Expand-Archive -Path TabularEditor.zip -DestinationPath .te2 -Force
+          Write-Host "Tabular Editor installed at .te2"
+
+      - name: Run naming convention checks
+        env:
+          MODEL_PATHS: ${{ inputs.model_paths }}
+        run: python .cicd/scripts/check_model.py
+
+      - name: Run BPA
+        env:
+          MODEL_PATHS: ${{ inputs.model_paths }}
+          TE2_PATH: .te2/TabularEditor.exe
+        run: python .cicd/scripts/run_bpa.py
+
+      - name: Annotate model results
+        if: always()
+        shell: bash
+        run: |
+          if [ -f model-results.json ]; then
+            python -c "
+          import json
+          data = json.load(open('model-results.json'))
+          for model, checks in data.items():
+              for check, issues in checks.items():
+                  for issue in issues:
+                      print(f'::warning title={check}::{model} — {issue}')
+          "
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-check-results
+          path: |
+            model-results.json
+            bpa-results/
