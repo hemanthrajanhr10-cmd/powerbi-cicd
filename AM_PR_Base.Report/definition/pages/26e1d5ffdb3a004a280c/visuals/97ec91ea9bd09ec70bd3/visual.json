@@ -1,0 +1,94 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "97ec91ea9bd09ec70bd3",
+  "position": {
+    "x": 240.13802576257561,
+    "y": 102.91629675538954,
+    "z": 0,
+    "height": 588.68121744082816,
+    "width": 830.19146049347569,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "publicholidays"
+                    }
+                  },
+                  "Property": "countryOrRegion"
+                }
+              },
+              "queryRef": "publicholidays.countryOrRegion",
+              "nativeQueryRef": "countryOrRegion"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "publicholidays"
+                    }
+                  },
+                  "Property": "countryRegionCode"
+                }
+              },
+              "queryRef": "publicholidays.countryRegionCode",
+              "nativeQueryRef": "countryRegionCode"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "publicholidays"
+                    }
+                  },
+                  "Property": "date"
+                }
+              },
+              "queryRef": "publicholidays.date",
+              "nativeQueryRef": "date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "publicholidays"
+                    }
+                  },
+                  "Property": "holidayName"
+                }
+              },
+              "queryRef": "publicholidays.holidayName",
+              "nativeQueryRef": "holidayName"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "publicholidays"
+                    }
+                  },
+                  "Property": "isPaidTimeOff"
+                }
+              },
+              "queryRef": "publicholidays.isPaidTimeOff",
+              "nativeQueryRef": "isPaidTimeOff"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}
