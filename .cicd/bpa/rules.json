@@ -1,0 +1,110 @@
+[
+  {
+    "ID": "CUSTOM_MEASURE_PREFIX",
+    "Name": "Measures must start with '.'",
+    "Category": "Naming Conventions",
+    "Description": "All measures should be prefixed with '.' for easy identification in field lists.",
+    "Severity": 2,
+    "Scope": "Measure",
+    "Expression": "!Name.StartsWith(\".\")"
+  },
+  {
+    "ID": "CUSTOM_MEASURE_FOLDER",
+    "Name": "Measures must be in a display folder",
+    "Category": "Organization",
+    "Description": "Measures must not sit in the root of a table — assign a display folder.",
+    "Severity": 2,
+    "Scope": "Measure",
+    "Expression": "string.IsNullOrWhiteSpace(DisplayFolder)"
+  },
+  {
+    "ID": "CUSTOM_COLUMN_FOLDER",
+    "Name": "Visible columns must be in a display folder",
+    "Category": "Organization",
+    "Description": "Non-hidden columns should be organised into display folders.",
+    "Severity": 1,
+    "Scope": "Column",
+    "Expression": "!IsHidden && string.IsNullOrWhiteSpace(DisplayFolder)"
+  },
+  {
+    "ID": "CUSTOM_CALC_GROUP_PREFIX",
+    "Name": "Calculation group tables must start with 'CG'",
+    "Category": "Naming Conventions",
+    "Description": "Calculation group tables should be prefixed with 'CG' for discoverability.",
+    "Severity": 2,
+    "Scope": "Table",
+    "Expression": "ObjectType == ObjectType.Table && (bool)GetAnnotation(\"TabularEditor_InPerspective\") == false && DataCategory == \"Time\" ? false : (bool)(this is CalculationGroupTable) && !Name.StartsWith(\"CG\")"
+  },
+  {
+    "ID": "CUSTOM_MEASURE_DESCRIPTION",
+    "Name": "Measures should have a description",
+    "Category": "Documentation",
+    "Description": "Every measure should include a description explaining what it calculates.",
+    "Severity": 1,
+    "Scope": "Measure",
+    "Expression": "string.IsNullOrWhiteSpace(Description)"
+  },
+  {
+    "ID": "CUSTOM_TABLE_DESCRIPTION",
+    "Name": "Tables should have a description",
+    "Category": "Documentation",
+    "Description": "Every table should include a description.",
+    "Severity": 1,
+    "Scope": "Table",
+    "Expression": "string.IsNullOrWhiteSpace(Description)"
+  },
+  {
+    "ID": "CUSTOM_COLUMN_DESCRIPTION",
+    "Name": "Visible columns should have a description",
+    "Category": "Documentation",
+    "Description": "Non-hidden columns should include a description.",
+    "Severity": 1,
+    "Scope": "Column",
+    "Expression": "!IsHidden && string.IsNullOrWhiteSpace(Description)"
+  },
+  {
+    "ID": "TE_NO_IMPLICIT_MEASURES",
+    "Name": "Do not use floating point data types",
+    "Category": "Error Prevention",
+    "Description": "Floating point columns (Double/Single) can cause rounding errors. Prefer Decimal.",
+    "Severity": 1,
+    "Scope": "Column",
+    "Expression": "DataType == DataType.Double || DataType == DataType.Single"
+  },
+  {
+    "ID": "TE_HIDE_FK_COLUMNS",
+    "Name": "Foreign key columns should be hidden",
+    "Category": "Organization",
+    "Description": "Columns used only for relationships should be hidden from report view.",
+    "Severity": 1,
+    "Scope": "Column",
+    "Expression": "Model.Relationships.Any(r => r.FromColumn == this) && !IsHidden"
+  },
+  {
+    "ID": "TE_UNUSED_COLUMNS",
+    "Name": "Remove unused columns",
+    "Category": "Performance",
+    "Description": "Columns that are not referenced by any measure, relationship, or hierarchy waste memory.",
+    "Severity": 1,
+    "Scope": "Column",
+    "Expression": "!IsHidden && !UsedInRelationships.Any() && !UsedInHierarchies.Any() && !ReferencedBy.AllMeasures.Any() && !ReferencedBy.AllColumns.Any()"
+  },
+  {
+    "ID": "TE_MEASURE_FORMAT",
+    "Name": "Measures should have a format string",
+    "Category": "Formatting",
+    "Description": "All measures should declare an explicit format string.",
+    "Severity": 1,
+    "Scope": "Measure",
+    "Expression": "string.IsNullOrWhiteSpace(FormatString)"
+  },
+  {
+    "ID": "TE_SUMMARIZE_NUMERIC",
+    "Name": "Numeric columns should not be summarised by default",
+    "Category": "Correctness",
+    "Description": "Set SummarizeBy to None on numeric columns that are not intended to be aggregated directly.",
+    "Severity": 2,
+    "Scope": "Column",
+    "Expression": "DataType == DataType.Int64 && SummarizeBy != AggregateFunction.None && !UsedInRelationships.Any()"
+  }
+]
