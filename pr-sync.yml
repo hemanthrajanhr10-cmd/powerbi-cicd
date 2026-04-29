@@ -1,0 +1,53 @@
+name: PR Sync Pipeline
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  sync-and-refresh:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r .cicd/requirements.txt
+
+      - name: Detect model changes in PR
+        id: detect-model
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          if echo "$CHANGED" | grep -q '\.SemanticModel/'; then
+            echo "model_changed=true" >> $GITHUB_OUTPUT
+            echo "Model changes detected — refresh will be triggered after sync."
+          else
+            echo "model_changed=false" >> $GITHUB_OUTPUT
+            echo "No model changes detected."
+          fi
+
+      - name: Sync workspace from Git
+        env:
+          POWERBI_TENANT_ID: ${{ secrets.POWERBI_TENANT_ID }}
+          POWERBI_CLIENT_ID: ${{ secrets.POWERBI_CLIENT_ID }}
+          POWERBI_CLIENT_SECRET: ${{ secrets.POWERBI_CLIENT_SECRET }}
+          FABRIC_WORKSPACE_ID: ${{ secrets.FABRIC_WORKSPACE_ID }}
+          COMMIT_HASH: ${{ github.sha }}
+        run: python .cicd/scripts/sync_workspace.py
+
+      - name: Trigger semantic model refresh
+        if: steps.detect-model.outputs.model_changed == 'true'
+        env:
+          POWERBI_TENANT_ID: ${{ secrets.POWERBI_TENANT_ID }}
+          POWERBI_CLIENT_ID: ${{ secrets.POWERBI_CLIENT_ID }}
+          POWERBI_CLIENT_SECRET: ${{ secrets.POWERBI_CLIENT_SECRET }}
+          FABRIC_WORKSPACE_ID: ${{ secrets.FABRIC_WORKSPACE_ID }}
+          DATASET_ID: ${{ secrets.DATASET_ID }}
+        run: python .cicd/scripts/trigger_refresh.py
